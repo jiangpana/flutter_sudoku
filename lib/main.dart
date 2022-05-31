@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_sudoku/ui/main/MyHomePage.dart';
 import 'package:flutter_sudoku/ui/setting/GameSettingPage.dart';
 import 'package:flutter_sudoku/util/SpUtil.dart';
@@ -16,6 +18,12 @@ void main() {
 }
 
 void realRunApp() async {
+  try {
+    //设置高刷模式
+    await FlutterDisplayMode.setHighRefreshRate();
+  } on Exception catch (e) {
+  }
+
   await SpUtil.getInstance();
   runApp(MyApp());
 }

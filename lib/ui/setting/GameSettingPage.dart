@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/Constant.dart';
 import '../../util/SpUtil.dart';
+import '../widget/GameSuccess.dart';
 
 class GameSettingPage extends StatefulWidget {
   static const route = '/sudoku/setting';
@@ -16,7 +17,7 @@ class GameSettingPage extends StatefulWidget {
   }
 }
 
-class GameSettingPageState extends State<GameSettingPage> {
+class GameSettingPageState extends State<GameSettingPage> with TickerProviderStateMixin {
   var settings = [
 
     ListItem(

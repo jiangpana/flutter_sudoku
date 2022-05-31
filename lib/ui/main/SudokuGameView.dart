@@ -3,6 +3,7 @@ import 'package:flutter_sudoku/ext/Ext.dart';
 import 'package:flutter_sudoku/game/Game.dart';
 import 'package:flutter/material.dart';
 
+import '../widget/GameSuccess.dart';
 import 'MyHomePage.dart';
 
 late var width;
@@ -11,21 +12,51 @@ late Cell selectCell;
 late List<List<Cell>> data = QuesProvider().getQuesArray2d();
 double padding = 8;
 
+/*
+return Listener(
+child: Padding(
+padding: new EdgeInsets.all(padding),
+child:
+CustomPaint(
+size: Size(size, size),
+painter: SudokuGamePainter(context, state),)
+),
+onPointerMove: (PointerEvent event) => handleMotionEvent(event, state),
+onPointerDown: (PointerEvent event) => handleMotionEvent(event, state),
+onPointerUp: (PointerEvent event) => handleMotionEvent(event, state),
+);
+*/
+
 Widget sudokuGameView(BuildContext context, SudokuGamePageState state) {
   var size = isPortrait(context)
       ? MediaQuery.of(context).size.width
       : MediaQuery.of(context).size.height;
-  return Listener(
-    child: Padding(
-      padding: new EdgeInsets.all(padding),
-      child: CustomPaint(
-        size: Size(size, size),
-        painter: SudokuGamePainter(context, state),
-      ),
+  var child = <Widget>[
+    Listener(
+      child: Padding(
+          padding: new EdgeInsets.all(padding),
+          child: CustomPaint(
+            size: Size(size, size),
+            painter: SudokuGamePainter(context, state),
+          )),
+      onPointerMove: (PointerEvent event) => handleMotionEvent(event, state),
+      onPointerDown: (PointerEvent event) => handleMotionEvent(event, state),
+      onPointerUp: (PointerEvent event) => handleMotionEvent(event, state),
     ),
-    onPointerMove: (PointerEvent event) => handleMotionEvent(event, state),
-    onPointerDown: (PointerEvent event) => handleMotionEvent(event, state),
-    onPointerUp: (PointerEvent event) => handleMotionEvent(event, state),
+  ];
+  if (state.newGame) {
+    state.newGame = false;
+    child.add(Padding(
+      padding: new EdgeInsets.all(padding),
+      child: Container(
+        child: gameSuccessAnim(state),
+        width: size,
+        height: size,
+      ),
+    ));
+  }
+  return Stack(
+    children: child,
   );
 }
 
@@ -86,7 +117,7 @@ class SudokuGamePainter extends CustomPainter {
         if (cell.value != 0) {
           var color;
           var selectCellVal = selectCell.value;
-          if(state.hignSimilarCell){
+          if (state.hignSimilarCell) {
             if (cell.isEditable &&
                 (cell.value != selectCellVal || cell == selectCell)) {
               color = Colors.blue;
@@ -95,11 +126,10 @@ class SudokuGamePainter extends CustomPainter {
             } else {
               color = Colors.black;
             }
-
-          }else{
-            if (cell.isEditable){
+          } else {
+            if (cell.isEditable) {
               color = Colors.blue;
-            }else{
+            } else {
               color = Colors.black;
             }
           }
@@ -128,7 +158,7 @@ class SudokuGamePainter extends CustomPainter {
   }
 
   void drawLine(Canvas canvas) {
-    for (var index = 0; index < 9; index++) {
+    for (var index = 1; index < 9; index++) {
       lingPaint.strokeWidth = 1;
       var colStart = Offset(index * cellWidth, 0);
       var colEnd = Offset(index * cellWidth, width);
@@ -137,14 +167,24 @@ class SudokuGamePainter extends CustomPainter {
       var rowEnd = Offset(width, index * cellWidth);
       canvas.drawLine(rowStart, rowEnd, lingPaint);
     }
-    for (var index = 0; index < 4; index++) {
+    for (var index = 0; index < 3; index++) {
       var colStart = Offset(index * cellWidth * 3, 0);
       var colEnd = Offset(index * cellWidth * 3, width);
-      lingPaint.strokeWidth = 4;
-      canvas.drawLine(colStart, colEnd, lingPaint);
       var rowStart = Offset(0, index * cellWidth * 3);
       var rowEnd = Offset(width, index * cellWidth * 3);
-      canvas.drawLine(rowStart, rowEnd, lingPaint);
+      lingPaint.strokeWidth = 3;
+      if (index == 0) {
+        //绘制最外层边框
+        lingPaint.style = PaintingStyle.stroke;
+        lingPaint.strokeCap = StrokeCap.square;
+        lingPaint.isAntiAlias = true;
+        RRect rRect = RRect.fromLTRBR(
+            0, 0, cellWidth * 9, cellWidth * 9, Radius.circular(3));
+        canvas.drawRRect(rRect, lingPaint);
+      } else {
+        canvas.drawLine(colStart, colEnd, lingPaint);
+        canvas.drawLine(rowStart, rowEnd, lingPaint);
+      }
     }
   }
 
@@ -178,7 +218,7 @@ class SudokuGamePainter extends CustomPainter {
   }
 
   void drawSimilarCell(Canvas canvas) {
-    if(!state.hignSimilarCell)return;
+    if (!state.hignSimilarCell) return;
     hignPaint.color = Colors.green;
     var curVal = selectCell.value;
     for (var element in data) {

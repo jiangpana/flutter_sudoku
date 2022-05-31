@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sudoku/ui/setting/GameSettingPage.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/Constant.dart';
@@ -17,9 +18,10 @@ class SudokuGamePage extends StatefulWidget {
   SudokuGamePageState createState() => SudokuGamePageState();
 }
 
-class SudokuGamePageState extends State<SudokuGamePage> with RouteAware  {
+class SudokuGamePageState extends State<SudokuGamePage> with RouteAware ,TickerProviderStateMixin {
   var colIndex = 0;
   var rowIndex = 0;
+  var newGame =true;
 
   @override
   void didPopNext() {
@@ -155,6 +157,7 @@ void onClickNumber(SudokuGamePageState state, int value) {
         });
         if (success) {
           showGameSuccessDialog(reStart: () {
+            state.newGame =true;
             reStartGame(state);
           });
         }
@@ -164,6 +167,8 @@ void onClickNumber(SudokuGamePageState state, int value) {
 }
 
 void reStartGame(SudokuGamePageState state) {
+  state.colIndex = 0;
+  state.rowIndex = 0;
   state.setState(() {
     data.forEach((element) {
       element.forEach((cell) {
@@ -185,9 +190,12 @@ void showGameSuccessDialog({
       return AlertDialog(
         content: ListBody(
           children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[Text("游戏成功")],
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Lottie.asset('anim/game_success.json'),
+                Text("游戏成功!")],
             ),
             ...?children,
           ],
